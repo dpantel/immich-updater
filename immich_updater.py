@@ -16,12 +16,21 @@ miss a "breaking change" release between runs.
 
 import re
 import sys
+from datetime import datetime, timezone
 import requests
 import sh
 
 
+### CHANGE THESE VALUES ###
+
 # Where do the Immich docker-compose.yml and .env files live?
 IMMICH_DIR = '/opt/immich'
+
+# How many days do you want to wait after the latest release before you
+# update to it? (Allows the initial kinks to get worked out.)
+DELAY_DAYS = 3
+
+############################
 
 
 # Retrieve currently-install version from the API.
@@ -70,6 +79,18 @@ if int(latest_version[1]) != int(curr_vers['minor']):
                   f' ({release_data["tag_name"]}). Will not proceed with the'
                   ' update.')
             sys.exit(0)
+
+# One last check is the delay setting
+
+# Grab the release publish date, and convert to a datetime object.
+# Versions < 3.11 do not support TZ 'Z', so replace it with '+00:00'.
+release_DT = datetime.fromisoformat(
+    release_data['published_at'].replace('Z', '+00:00'))
+
+# Has enough time elapsed?
+if (datetime.now(timezone.utc) - release_DT).days < DELAY_DAYS:
+    # No. Abort.
+    sys.exit(0)
 
 # If we made it this far, then there has been an update and no breaking
 # changes have been detected. Ok to proceed with update.

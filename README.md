@@ -15,12 +15,15 @@ Also, this script only looks at the notes of the LATEST release. That means that
 ## Installation & Running
 
 1. Copy the script to a location of your choice. I recommend `/etc/cron.daily/` or `/etc/cron.weekly/` so that it runs on a schedule (see Limitations).
-1. Edit the `IMMICH_DIR` variable at the top of the script to point to the correct location.
+1. Edit variables at the top of the script to suit your needs:
+   - `IMMICH_DIR` is the location of your Immich docker-compose.yml.
+   - `DELAY_DAYS` allows you to wait some days after a new release, before updating.
 1. Make it executable.
 
 If there is nothing to do, there is no output. Anything else prints messages to STDOUT.
 
 ## Requirements
+
 - Python v3.8+
 - Python [sh](https://github.com/amoffat/sh) module v2+
 - Docker compose
