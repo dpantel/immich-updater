@@ -15,6 +15,7 @@ Also, this script only looks at the notes of the LATEST release. That means that
 ## Installation & Running
 
 1. Copy the script to a location of your choice. I recommend `/etc/cron.daily/` or `/etc/cron.weekly/` so that it runs on a schedule (see Limitations).
+1. Edit the `IMMICH_DIR` variable at the top of the script to point to the correct location.
 1. Make it executable.
 
 If there is nothing to do, there is no output. Anything else prints messages to STDOUT.
