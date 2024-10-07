@@ -15,6 +15,7 @@ Also, this script only looks at the notes of the LATEST release. That means that
 ## Installation & Running
 
 1. Copy the script to a location of your choice. I recommend `/etc/cron.daily/` or `/etc/cron.weekly/` so that it runs on a schedule (see Limitations).
+   - remember to take the extension off the file name, or the script will not be executed.
 1. Edit variables at the top of the script to suit your needs:
    - `IMMICH_DIR` is the location of your Immich docker-compose.yml.
    - `DELAY_DAYS` allows you to wait some days after a new release, before updating.

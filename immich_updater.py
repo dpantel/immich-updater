@@ -33,6 +33,14 @@ DELAY_DAYS = 3
 ############################
 
 
+def err(err_obj: sh.ErrorReturnCode):
+    """Prints error messages and quits."""
+    print('Error: Failed to run previous command with error code "'
+          f'{err_obj.exit_code}". Error message:')
+    print(err_obj.stderr)
+    sys.exit(1)
+
+
 # Retrieve currently-install version from the API.
 # JSON dictionary object with 'major', 'minor', and 'patch' keys.
 r = requests.get('http://localhost:2283/api/server-info/version', timeout=30)
@@ -97,14 +105,21 @@ if (datetime.now(timezone.utc) - release_DT).days < DELAY_DAYS:
 
 # Build a docker SH command
 docker = sh.Command('docker')
-docker = docker.bake(_err_to_out=True, _cwd=IMMICH_DIR)
+docker = docker.bake(_cwd=IMMICH_DIR)
 
 # pull
-print('Immich-Updater: Updating to the latest version.')
-print(docker('compose', 'pull'))
+print(
+    f'Immich-Updater: Updating from {curr_vers_str} to {latest_version_str}.')
+try:
+    out = docker('compose', 'pull')
+except sh.ErrorReturnCode as e:
+    err(e)
 
 # reload
 print('Immich-Updater: Reloading server.')
-print(docker('compose', 'up', '-d'))
+try:
+    out = docker('compose', 'up', '-d')
+except sh.ErrorReturnCode as e:
+    err(e)
 
 sys.exit(0)
