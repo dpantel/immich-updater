@@ -43,7 +43,7 @@ def err(err_obj: sh.ErrorReturnCode):
 
 # Retrieve currently-install version from the API.
 # JSON dictionary object with 'major', 'minor', and 'patch' keys.
-r = requests.get('http://localhost:2283/api/server-info/version', timeout=30)
+r = requests.get('http://localhost:2283/api/server/version', timeout=30)
 curr_vers = r.json()
 curr_vers_str = (f'v{curr_vers["major"]}.{curr_vers["minor"]}'
                  f'.{curr_vers["patch"]}')
