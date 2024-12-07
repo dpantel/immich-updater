@@ -17,6 +17,7 @@ miss a "breaking change" release between runs.
 import re
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 import requests
 import sh
 
@@ -25,6 +26,9 @@ import sh
 
 # Where do the Immich docker-compose.yml and .env files live?
 IMMICH_DIR = '/opt/immich'
+
+# Name of the file to create in IMMICH_DIR to signify a prior aborted update
+BREAKING_CHANGE_FLAG = 'BREAKING_CHANGE'
 
 # How many days do you want to wait after the latest release before you
 # update to it? (Allows the initial kinks to get worked out.)
@@ -40,6 +44,16 @@ def err(err_obj: sh.ErrorReturnCode):
     print(err_obj.stderr)
     sys.exit(1)
 
+
+# Create a Path object for the breaking-change flag file
+BCF = Path(IMMICH_DIR, BREAKING_CHANGE_FLAG)
+
+# Check if there was a breaking change in a past release.
+# Do this first, since it does not require remote web requests
+if BCF.is_file():
+    print("Detected a prior breaking change.\n\n"
+          f'Remember to delete the "{BCF}" file, when updating manually.')
+    sys.exit(0)
 
 # Retrieve currently-install version from the API.
 # JSON dictionary object with 'major', 'minor', and 'patch' keys.
@@ -80,12 +94,15 @@ if int(latest_version[1]) != int(curr_vers['minor']):
         # Dumb regex search for literaly "breaking change".
         # This has been a consistent pattern in the release notes for a while.
         if re.search('breaking change', line, re.IGNORECASE) is not None:
-            # Line found
+            # Create a breaking change flag file with the breaking version #
+            BCF.write_text(latest_version_str, encoding='utf-8')
+
             print('Immich-Updater: A breaking change has been detected when'
                   ' comparing the currently-installed version'
                   f' ({curr_vers_str}) to the latest release'
-                  f' ({release_data["tag_name"]}). Will not proceed with the'
-                  ' update.')
+                  f' ({latest_version_str}). Will not proceed with the'
+                  f" update.\n\nRemember to delete the '{BCF}' file,"
+                  ' when updating manually.')
             sys.exit(0)
 
 # One last check is the delay setting
